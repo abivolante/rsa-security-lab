@@ -14,8 +14,8 @@ In progress
 
 ### Part 1 — Correct implementation
 - [x ] Fast modular exponentiation (`mod_pow`)
-- [ ] Extended Euclidean algorithm / modular inverse
-- [ ] Miller-Rabin primality test
+- [x] Extended Euclidean algorithm / modular inverse
+- [x] Miller-Rabin primality test
 - [ ] Prime generation (target bit-length, minimum gap between `p` and `q`,
       cryptographically secure randomness via `secrets`)
 - [ ] Key generation (`e = 65537`, correct `d` via modular inverse)
