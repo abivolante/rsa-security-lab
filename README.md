@@ -70,4 +70,6 @@ rsa-security-lab/
 ├── README.md
 └── .gitignore
 ```
+## References
+- Binary (fast) exponentiation — https://cp-algorithms.com/algebra/binary-exp.html
 
