@@ -13,7 +13,7 @@ In progress
 ## Plan / Scope
 
 ### Part 1 — Correct implementation
-- [x ] Fast modular exponentiation (`mod_pow`)
+- [x] Fast modular exponentiation (`mod_pow`)
 - [x] Extended Euclidean algorithm / modular inverse
 - [x] Miller-Rabin primality test
 - [ ] Prime generation (target bit-length, minimum gap between `p` and `q`,
