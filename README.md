@@ -52,9 +52,8 @@ For every attack above:
 ```
 rsa-security-lab/
 ├── rsa/
-│   ├── mod_pow.py     #function to calculate b^e mod n
-│   ├──  euclid.py.         # extended Euclidean algorithm
 │   ├── primes.py         # Miller-Rabin, prime generation
+│   ├── modular.py        # extended Euclidean algorithm, mod_pow
 │   ├── keygen.py          # hardened key generation
 │   └── cipher.py           # encrypt / decrypt
 ├── attacks/
