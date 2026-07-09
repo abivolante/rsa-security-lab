@@ -1,7 +1,7 @@
 # RSA Security Lab
 
 This project is an implementation of RSA from scratch, paired with a set of classic attacks
-that exploit real-world implementation mistakes — and tests proving those
+that exploit real-world implementation mistakes  and tests proving those
 attacks succeed against weak keys but fail against this project's hardened
 key generation.
 
@@ -13,7 +13,7 @@ In progress
 ## Plan / Scope
 
 ### Part 1 — Correct implementation
-- [ ] Fast modular exponentiation (`mod_pow`)
+- [x ] Fast modular exponentiation (`mod_pow`)
 - [ ] Extended Euclidean algorithm / modular inverse
 - [ ] Miller-Rabin primality test
 - [ ] Prime generation (target bit-length, minimum gap between `p` and `q`,
@@ -37,10 +37,6 @@ Each attack targets one specific, real-world implementation mistake:
 - [ ] **Wiener's attack** — breaks keys where the private exponent `d` is
       too small, via continued fraction expansion of `e/n`
 
-*(Out of scope, and explicitly documented as such: timing attacks. Doing
-these properly requires real hardware measurement and statistical noise
-filtering — a systems/security-research project in its own right, not
-something to fake with simulated timing data.)*
 
 ### Part 3 — Proving the defenses work
 For every attack above:
@@ -50,8 +46,29 @@ For every attack above:
 - [ ] A test showing the attack **fails** against this project's normal,
       hardened `generate_keypair()`
 
-This is the actual deliverable: not "an implementation" and not "some
-exploit scripts," but a tested, causal link between specific bad practices
-and specific breaks — and specific defenses that close them.
 
 ## Project structure
+
+```
+rsa-security-lab/
+├── rsa/
+│   ├── mod_pow.py     #function to calculate b^e mod n
+│   ├──  euclid.py.         # extended Euclidean algorithm
+│   ├── primes.py         # Miller-Rabin, prime generation
+│   ├── keygen.py          # hardened key generation
+│   └── cipher.py           # encrypt / decrypt
+├── attacks/
+│   ├── fermat_factor.py
+│   ├── common_modulus.py
+│   ├── shared_prime.py
+│   └── wiener.py
+├── vulnerable_examples.py  # deliberately weak key generators, one per attack
+├── tests/
+│   ├── test_rsa_correctness.py
+│   ├── test_attacks_succeed.py   # attacks work against weak keys
+│   └── test_attacks_fail.py       # attacks fail against hardened keys
+├── PROOF.md                        # the decryption-correctness proof
+├── README.md
+└── .gitignore
+```
+
