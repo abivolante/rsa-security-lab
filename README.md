@@ -55,25 +55,3 @@ exploit scripts," but a tested, causal link between specific bad practices
 and specific breaks — and specific defenses that close them.
 
 ## Project structure
-
-```
-rsa-security-lab/
-├── rsa/
-│   ├── primes.py         # Miller-Rabin, prime generation
-│   ├── modular.py        # extended Euclidean algorithm, mod_pow
-│   ├── keygen.py          # hardened key generation
-│   └── cipher.py           # encrypt / decrypt
-├── attacks/
-│   ├── fermat_factor.py
-│   ├── common_modulus.py
-│   ├── shared_prime.py
-│   └── wiener.py
-├── vulnerable_examples.py  # deliberately weak key generators, one per attack
-├── tests/
-│   ├── test_rsa_correctness.py
-│   ├── test_attacks_succeed.py   # attacks work against weak keys
-│   └── test_attacks_fail.py       # attacks fail against hardened keys
-├── PROOF.md                        # the decryption-correctness proof
-├── README.md
-└── .gitignore
-```
