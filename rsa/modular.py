@@ -6,12 +6,8 @@ which will help us throughout our RSA implementation
 
 def mod_pow(base, exp, mod):
     """
-    mod_pow(base,exp,mod) is a function that outputs base^exp % mod by application of a
-    technique called Binary Exponentiation. This technique allows for efficient
-    calculation as exp and mod can be hundreds of digits long in real RSA. Computing
-    base^exp directly would be astronomically slow (O(mod) multiplications) while this allow
-    for O(log mod) multiplications.
-    """
+    mod_pow(base,exp,mod) is a function that outputs base^exp % mod b   
+     """
     result = 1
     base = base % mod
     while exp > 0:

@@ -1,0 +1,144 @@
+\documentclass{article}
+\usepackage{blindtext}
+\usepackage{titlesec}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath, amssymb}
+\usepackage{pifont}
+\usepackage{enumitem}
+\usepackage{amsthm}
+\usepackage{biblatex}
+
+\addbibresource{references.bib}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Defintion}[section]
+
+
+\lstset{
+	language=Python,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{blue},
+	commentstyle=\color{gray},
+	stringstyle=\color{orange},
+	showstringspaces=false,
+	breaklines=true,
+	frame=single
+}
+
+\title{RSA Security Lab}
+\author{Abigail Volante}
+\begin{document}
+	
+	\maketitle
+	
+	\tableofcontents
+	
+	\section{Introduction}
+	This document contains all the necessary explanations and proofs behind this project. As much as the mathematician in me would like this to be fully rigorous, 
+	I think it's more useful to strike a balance between rigour and 
+	understanding. My aim is to explain my thought process about the project, 
+	as well as how I actually wrote the code.
+	
+	Most RSA implementations I've seen are presented without any argument that the code actually computes what the mathematics claims, and without examining what happens when implementation choices depart from the ideal. I aim to close this gap and to actually fully explain the theory behind RSA.
+	
+	I do not attempt to give full proofs for every algorithm used here but
+	only for the things where the proof is the actual point. This includes:
+	\begin{itemize}
+		\item RSA correctness
+		\item \texttt{mod\_pow}'s loop invariant
+		\item Miller-Rabin's probabilistic error bound
+		\item Why each attack works mathematically
+	\end{itemize}
+	
+	For everything else, I give a logical explanation instead. Full 
+	proofs for those standard results are easy to find elsewhere.
+	\section{Prerequisites}
+	
+	Knowledge of modular arithmetic and elementary proof techniques is recommended.
+	
+	Throughout this project, I will be referring to an important theorem called \textit{The Loop Invariant Theorem}. Its proof can be readily found in many resources. 
+
+	\begin{definition}
+		The \textbf{guard} of a while loop is the condition restricting entry to 
+		the loop. The assertion just preceding the loop is called the 
+		\textbf{pre-condition for the loop}, and the one following is called the 
+		\textbf{post-condition for the loop}.
+	\end{definition}
+	
+	\begin{definition}
+	A loop is \textbf{correct with respect to its pre- and post-conditions} if, and only if, whenever the algorithm variables satisfy the pre-conditions for the loop and the loop terminates after a finite number of steps, the arlgorithm variables satisfy the post-condition for the loop.
+	\end{definition}
+	\begin{theorem}[\textbf{Loop Invariant Theorem}]
+	Let a while loop with a guard $G$ be given, together with pre- and post-conditions that are predicates in the algorithm variables. Also, let a predicate $I(n)$ called the \textbf{loop invariant} be given. If the following four properties hold, then the loop is correct with respect to its pre- and post-conditions.
+	\begin{enumerate}
+		\item \textbf{Basis Property:} The pre-condition for the loop implies that $I(0)$ is true before the first iteration of the loop
+		\item \textbf{Inductive Property} For every integer $k \geq 0,$ if the guard $G$ and the loop invariant $I(k)$ are both true before an iteration of the loop, then $I(k+1)$ is true after an iteration of the loop
+		\item \textbf{Eventual Falsity of Guard} After a finite number of iterations of the loop, the guard G becomes false.
+		\item \textbf{Correctness of the Post-Condition} If $N$ is the least number of iterations after which $G$ is false and $I(N)$ is true, then the values of the algorithm variables will be as specified in the post-condition of the loop.
+	\end{enumerate}
+	\end{theorem}
+	
+	
+	
+	
+	\section{RSA- How does it work?}
+	
+	\section{Helpful Functions}
+	
+	The very first thing we need to do is to write out helpful functions which we will be calling later when implementing the RSA code. This includes \texttt{mod\_pow}, \texttt{extended\_gcd}, and \texttt{mod\_inverse.}
+	
+	\subsection{Modular Binary Exponentiation Algorithm}
+	The \texttt{mod\_pow} ( modular power) function  takes in values $b, e,$ and $n$ and outputs $b^e \bmod n.$ We will be using this function when creating the encryption and decryption keys as well as for the Miller-Rabin test.  Here is the exact algorithm we used in this project:
+	
+	\begin{lstlisting}[title=Modular Binary Exponentiation Algorithm]
+def mod_pow(base, exp, mod):
+	result = 1
+	base = base % mod
+	while exp > 0:
+		if exp % 2 == 1:
+			result = (result * base) % mod
+		exp //= 2
+		base = (base * base) % mod
+	return result
+	\end{lstlisting}
+	
+	How exactly do we calculate $b^e \bmod n?$ For a demonstration, let us consider $3^{13} \bmod 5.$ We first calculate $3 \bmod 5$ then using that result, calculate $3^2 \bmod 5$ then $3^4 \bmod 5$ and so on. We use the property:
+	\begin{equation} \label{1}
+		ab \bmod n \equiv (a \bmod n)(b \bmod n) \quad \text{for any} \quad  a,b,n \in \mathbb{Z}
+	\end{equation}
+	We find that
+	\begin{align*}
+		3 &\equiv 3 \bmod 5 \\
+		3^2 &\equiv 3^9 \equiv 9 \equiv 4 \bmod 5 \\
+		3^4 &\equiv 3^2 3^2 \equiv 4 \cdot 4 \equiv 16 \equiv 1 \bmod 5 \\
+		3^8 &\equiv 3^4 3^4 \equiv 1 \cdot 1 \equiv 1 \bmod 5.
+	\end{align*}
+	Writing $13=8+4+1$, we have
+	$$3^{13} \equiv 3^83^43^1 \equiv1 \cdot 1 \cdot 3 \equiv 3 \bmod 5.$$
+	
+	Notice how we didn't have to calculate $3^e \bmod 5$ until we get to $e=13.$ Instead, we only calculated the square powers of 3. This is actually, a more efficient way to do this. Calculating for every $e$ until we get to 13 would require us to perform 13 multiplications whereas with this method, we only need 4. We call this method \textit{Binary Exponentiation} and is the basis of this algorithm. In general, this algorithm has time complexity $O(\log e).$
+	
+	Notice that when we wrote $13=8+4+1,$ we unintentionally have represented 13 in its binary form $1101$ since:
+	$$13= 1\cdot 2^3 + 1 \cdot 2^2 + 0 \cdot 2^1 + 1 \cdot 2^0= 8+4+0+1$$
+	
+	Essentially, writing a number $e$ in its binary representation is to recursively perform the following. (The reader can easily check this holds.)
+	
+	\begin{enumerate}
+		\item Is $e$  divisible by 2? If yes, then $e$ has a 1 in its last digit in its binary representation otherwise it has 0.
+		\item Replace $e$ to be the its qoutient on division by 2 and repeat.
+	\end{enumerate}
+	This is exactly the structure of the while loop in \texttt{mod\_pow}: 
+	\texttt{exp \% 2} checks the current bit, and \texttt{exp //= 2} performs 
+	the halving step above. Whenever that bit is $1$, \texttt{result} is 
+	multiplied by the current \texttt{base}; squaring \texttt{base} each 
+	iteration moves it from $b^{2^k}$ to $b^{2^{k+1}}$, matching bit $k$ of 
+	$e$'s binary expansion. The one modification is that every value is 
+	reduced modulo $n$ throughout, keeping all numbers bounded by $n$ even 
+	when $e$ is large.
+	\subsection{Correctness of the Modular Binary Exponentiation Algorithm}
+	
+	\begin{thebibliography}{9}
+		\bibitem{epp} Epp, Susanna S. \textit{Discrete Mathematics with Applications}, 5th ed. Cengage Learning, 2019.
+	\end{thebibliography}
+\end{document}
